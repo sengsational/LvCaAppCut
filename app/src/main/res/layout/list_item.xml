@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="6dip"
+                android:id="@+id/b_item_layout">
+
+    <ImageView
+        android:id="@+id/bIcon"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:src="@mipmap/ic_launcher"
+        android:gravity="left"
+        android:visibility="invisible"
+        />
+
+    <TextView
+        android:id="@+id/bName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/bIcon"
+        android:layout_alignParentTop="true"
+        android:textAppearance="?android:attr/textAppearanceListItem"
+        android:ellipsize="end"
+        android:singleLine="true"
+        />
+
+    <TextView
+        android:id="@+id/bSecondLine"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/bIcon"
+        android:layout_toRightOf="@+id/bIcon"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+
+    <TextView
+        android:id="@+id/bDbItem"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        />
+    <TextView
+        android:id="@+id/bHidden"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        />
+
+    <TextView
+        android:id="@+id/bDescription"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        />
+</RelativeLayout>
+
