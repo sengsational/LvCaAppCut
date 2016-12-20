@@ -17,8 +17,6 @@ class DbSqlliteAdapter {
     private static DatabaseHelper mDbHelper;
     private static SQLiteDatabase mDb;
 
-    private static final HashSet<Integer> positionSet = new HashSet<>();
-
     private static final String DATABASE_NAME = "adbname";
     private static final String SQLITE_TABLE = "atablename";
     private static final int DATABASE_VERSION = 4;
@@ -33,17 +31,6 @@ class DbSqlliteAdapter {
                     "HIDDEN, " +
                     "DESCRIPTION" +
                     ");";
-
-    static Model loadModel(Model model) {
-        Model dbModel = DbSqlliteAdapter.getById(model.getId() + "");
-        Log.v(TAG, "looked up " + model.getId() + " and it found " + dbModel.toString());
-        model.setId(dbModel.getId());
-        model.setName(dbModel.getName());
-        model.setSecond_line(dbModel.getSecond_line());
-        model.setDescription(dbModel.getDescription());
-        model.setHidden(dbModel.getHidden());
-        return model;
-    }
 
     // INNER CLASS DatabaseHelper
     private static class DatabaseHelper extends SQLiteOpenHelper {
@@ -105,51 +92,19 @@ class DbSqlliteAdapter {
         Log.v(TAG, "after update, resultInDb: " + resultInDb);
     }
 
-    static void update(Model model, int position) {
-        positionSet.add(position);
-        update(model);
-    }
-
-    static Integer[] getChangedPositions() {
-        Integer[] positions = positionSet.toArray(new Integer[0]);
-        positionSet.clear();
-        return positions;
-    }
-
-    ArrayList<Model> loadModelFromDatabase() {
-        ArrayList<Model> listModel = new ArrayList<>();
-
-        Cursor cursor = fetchAll(null); // null is all columns
-
-        if (cursor != null) {
-            do {
-                Model model = new Model();
-                model.setId(cursor.getLong(cursor.getColumnIndex(Model.ID)));
-                model.setName(cursor.getString(cursor.getColumnIndex(Model.NAME)));
-                model.setSecond_line(cursor.getString(cursor.getColumnIndex(Model.SECOND_LINE)));
-                model.setHidden(cursor.getString(cursor.getColumnIndex(Model.HIDDEN)));
-                model.setDescription(cursor.getString(cursor.getColumnIndex(Model.DESCRIPTION)));
-                model.setName(cursor.getString(cursor.getColumnIndex(Model.NAME)));
-                listModel.add(model);
-            } while (cursor.moveToNext());
-            cursor.close();
-        }
-
-        return listModel;
-    }
-
     public DbSqlliteAdapter open() throws SQLException {
         mDbHelper = DatabaseHelper.getInstance(mContext);
         mDb = mDbHelper.getWritableDatabase();
         return this;
     }
 
-    void close() {
+    void closeDbHelper() {
         if (mDbHelper != null) {
             mDbHelper.close();
         }
     }
-    private Cursor fetchAll(String[] fields) {
+
+    static Cursor fetchAll(String[] fields) {
         Cursor mCursor = mDb.query(SQLITE_TABLE, fields, null, null, null, null, null);
         if (mCursor != null) {
             mCursor.moveToFirst();
@@ -157,12 +112,19 @@ class DbSqlliteAdapter {
         return mCursor;
     }
 
-    private static Model getById(String id) {
-        Cursor mCursor = mDb.query(SQLITE_TABLE, null, "_id=?", new String[]{id}, null, null, null);
-        if (mCursor != null) {
-            mCursor.moveToFirst();
+    static int getRecordCount() {
+        return fetchAll(null).getCount();
+    }
+
+    static Model getById(String id) {
+        Cursor cursor = mDb.query(SQLITE_TABLE, null, "_id=?", new String[]{id}, null, null, null);
+        if (cursor != null) {
+            cursor.moveToFirst();
+            Model model = new Model(cursor);
+            cursor.close();
+            return model;
         }
-        return new Model(mCursor);
+        return null;
     }
 
     void insertSome() {
@@ -178,7 +140,13 @@ class DbSqlliteAdapter {
         }
     }
 
-    boolean deleteAll() {
+    void insertSome(int count) {
+        for ( int i = 0; i < count; i++){
+            insertSome();
+        }
+    }
+
+    boolean deleteAll() { // keep
         int doneDelete = mDb.delete(SQLITE_TABLE, null , null);
         Log.w(TAG, Integer.toString(doneDelete));
         return doneDelete > 0;
